@@ -39,6 +39,13 @@ param keyVaultBaseUrl string = ''
 @description('Specifies additional name/value pairs to be appended to the functionap app appsettings.')
 param additionalAppSettings array = []
 
+@description('The SKU name for the App Service Plan. Y1 (Consumption/Dynamic) is the classic option but will be deprecated after September 2028, and new subscriptions may require quota requests. FC1 (FlexConsumption) is recommended for new deployments.')
+@allowed([
+  'Y1'
+  'FC1'
+])
+param appServicePlanSku string = 'Y1'
+
 var functionAppName = 'func-${appNamePrefix}-${substring(uniqueString(resourceGroup().id, deployment().name), 0, 4)}'
 var appServicePlanName = 'plan-${appNamePrefix}-${substring(uniqueString(resourceGroup().id, deployment().name), 0, 4)}'
 var appInsightsName = 'appi-${appNamePrefix}-${substring(uniqueString(resourceGroup().id, deployment().name), 0, 4)}'
@@ -46,6 +53,7 @@ var workspaceName = 'log-${appNamePrefix}-${substring(uniqueString(resourceGroup
 var storageAccountName = 'st${uniqueString(resourceGroup().id, deployment().name)}func'
 var keyVaultName = 'kv-${appNamePrefix}-${substring(uniqueString(resourceGroup().id, deployment().name), 0, 4)}'
 var roleDefinitionId = resourceId('Microsoft.Authorization/roleDefinitions/', 'a4417e6f-fecd-4de8-b567-7b0420556985')
+var appServicePlanTier = appServicePlanSku == 'Y1' ? 'Dynamic' : 'FlexConsumption'
 var acmebotAppSettings = [
   {
     name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -116,8 +124,8 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2024-11-01' = {
   name: appServicePlanName
   location: location
   sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
+    name: appServicePlanSku
+    tier: appServicePlanTier
   }
   properties: {}
 }
