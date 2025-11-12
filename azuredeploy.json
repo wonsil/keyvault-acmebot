@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "16442614651015046479"
+      "templateHash": "16110126102215843217"
     }
   },
   "parameters": {
@@ -79,6 +79,17 @@
       "metadata": {
         "description": "Specifies additional name/value pairs to be appended to the functionap app appsettings."
       }
+    },
+    "appServicePlanSku": {
+      "type": "string",
+      "defaultValue": "Y1",
+      "allowedValues": [
+        "Y1",
+        "FC1"
+      ],
+      "metadata": {
+        "description": "The SKU name for the App Service Plan. Y1 (Consumption/Dynamic) is the classic option but will be deprecated after September 2028, and new subscriptions may require quota requests. FC1 (FlexConsumption) is recommended for new deployments."
+      }
     }
   },
   "variables": {
@@ -88,7 +99,8 @@
     "workspaceName": "[format('log-{0}-{1}', parameters('appNamePrefix'), substring(uniqueString(resourceGroup().id, deployment().name), 0, 4))]",
     "storageAccountName": "[format('st{0}func', uniqueString(resourceGroup().id, deployment().name))]",
     "keyVaultName": "[format('kv-{0}-{1}', parameters('appNamePrefix'), substring(uniqueString(resourceGroup().id, deployment().name), 0, 4))]",
-    "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions/', 'a4417e6f-fecd-4de8-b567-7b0420556985')]"
+    "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions/', 'a4417e6f-fecd-4de8-b567-7b0420556985')]",
+    "appServicePlanTier": "[if(equals(parameters('appServicePlanSku'), 'Y1'), 'Dynamic', 'FlexConsumption')]"
   },
   "resources": [
     {
@@ -112,8 +124,8 @@
       "name": "[variables('appServicePlanName')]",
       "location": "[parameters('location')]",
       "sku": {
-        "name": "Y1",
-        "tier": "Dynamic"
+        "name": "[parameters('appServicePlanSku')]",
+        "tier": "[variables('appServicePlanTier')]"
       },
       "properties": {}
     },
