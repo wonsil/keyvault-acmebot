@@ -127,7 +127,9 @@
         "name": "[parameters('appServicePlanSku')]",
         "tier": "[variables('appServicePlanTier')]"
       },
-      "properties": {}
+      "properties": {
+         "reserved": false
+      }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces",
